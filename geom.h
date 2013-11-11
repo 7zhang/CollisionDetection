@@ -7,14 +7,17 @@
 #define ISZERO(u) (fabs(u) < 1e-6)
 #define MAX(a, b) (a > b ? a : b)
 #define MIN(a, b) (a < b ? a : b)
-#define POSITIVEZERO 10e-12
-#define NEGATIVEZERO -10e-12
+#define POSITIVEZERO 1e-12
+#define NEGATIVEZERO -1e-12
+#define MYZERO 1e-12
 typedef struct _vector3d
 {
 	float x;
 	float y;
 	float z;
 }vector3d;
+
+typedef float matrix[3][3];
 
 typedef struct _triangle
 {
@@ -64,6 +67,16 @@ static inline float commonpoint(vector3d *p1, vector3d *tangent1, vector3d *p2, 
 	return (diff.x * tangent2->y - diff.y * tangent2->x)
 		/ (tangent1->x * tangent2->y - tangent1->y * tangent2->x);
 }
+
+static inline void coordinatetransform(matrix m, vector3d *vec, vector3d *original, vector3d *point)
+{
+	point->x = m[0][0] * original->x + m[0][1] * original->y + m[0][2] * original->z + vec->x;
+	point->y = m[1][0] * original->x + m[1][1] * original->y + m[1][2] * original->z + vec->y;
+	point->z = m[2][0] * original->x + m[2][1] * original->y + m[2][2] * original->z + vec->z;
+}
+
+
+
 #endif /* _GEOM_H_ */
 
 

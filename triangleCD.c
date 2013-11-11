@@ -16,7 +16,8 @@ int triangleCD(triangle *t1, triangle *t2)
 	vectordot(&diff21, &(*t1).normalvector, &dot5);
 	vectordot(&diff31, &(*t1).normalvector, &dot6);
 
-	if ((dot4 > POSITIVEZERO && dot5 > POSITIVEZERO && dot6 > POSITIVEZERO) || (dot4 < NEGATIVEZERO && dot5 < NEGATIVEZERO && dot6 < NEGATIVEZERO)) {
+	if ((dot4 > POSITIVEZERO && dot5 > POSITIVEZERO && dot6 > POSITIVEZERO) ||
+	    (dot4 < NEGATIVEZERO && dot5 < NEGATIVEZERO && dot6 < NEGATIVEZERO)) {
 		return 0;
 	}
 	
@@ -29,7 +30,8 @@ int triangleCD(triangle *t1, triangle *t2)
 	vectordot(&diff21, &t2->normalvector, &dot2);
 	vectordot(&diff31, &t2->normalvector, &dot3);
 
-	if ((dot1 > POSITIVEZERO && dot2 > POSITIVEZERO && dot3 > POSITIVEZERO) || (dot1 < NEGATIVEZERO && dot2 < NEGATIVEZERO && dot3 < NEGATIVEZERO)) {
+	if ((dot1 > POSITIVEZERO && dot2 > POSITIVEZERO && dot3 > POSITIVEZERO) ||
+	    (dot1 < NEGATIVEZERO && dot2 < NEGATIVEZERO && dot3 < NEGATIVEZERO)) {
 		return 0;
 	}
 	
@@ -79,6 +81,8 @@ int triangleCD(triangle *t1, triangle *t2)
 		para1 = commonpoint(&p, &tangent, &t1->vertex3, &tmp);
 		vectorminus(&t1->vertex3, &t1->vertex2, &tmp);
 		para2 = commonpoint(&p, &tangent, &t1->vertex3, &tmp);
+	} else {
+		return 0;
 	}
 	
 	if ((dot4 < NEGATIVEZERO & dot5 > POSITIVEZERO & dot6 > POSITIVEZERO) ||
@@ -99,15 +103,16 @@ int triangleCD(triangle *t1, triangle *t2)
 		para3 = commonpoint(&p, &tangent, &t2->vertex3, &tmp);
 		vectorminus(&t2->vertex3, &t2->vertex2, &tmp);
 		para4 = commonpoint(&p, &tangent, &t2->vertex3, &tmp);
+	} else {
+		return 0;
 	}
 	
-	if (MAX(para1, para2) < MIN(para3, para4)) {
-		return 0;
-	} else if (MIN(para1, para2) > MAX(para3, para4)) {
-		return 0;
+	if ( (MAX(para1, para2) < MAX(para3, para4) + MYZERO && MAX(para1, para2) > MIN(para3, para4) - MYZERO) ||
+	     (MIN(para1, para2) < MAX(para3, para4) + MYZERO && MIN(para1, para2) > MIN(para3, para4) - MYZERO) ) {
+		return 1;
 	}
 
-	return 1;
+	return 0;
 }
 
 
