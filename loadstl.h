@@ -4,5 +4,6 @@
 #include "geom.h"
 
 int loadstl(const char *path, stldata *pstldata);
+int writestl(const char *path, stldata stl[]);
 
 #endif

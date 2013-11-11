@@ -1,8 +1,21 @@
 #include "triangleCD.h"
+#include "geom.h"
+#include <stdio.h>
 
 // 0 if no collision
 int triangleCD(triangle *t1, triangle *t2)
 {
+	double tmptest;
+	tmptest = t1->normalvector.x * t1->normalvector.x + t1->normalvector.y * t1->normalvector.y + t1->normalvector.z * t1->normalvector.z;
+	
+	if (!( tmptest < 1 + MYZERO && tmptest > 1 - MYZERO))
+		printf("normal vector error %f\n", tmptest);
+
+	tmptest = t2->normalvector.x * t2->normalvector.x + t2->normalvector.y * t2->normalvector.y + t2->normalvector.z * t2->normalvector.z;
+	
+	if (!( tmptest < 1 + MYZERO && tmptest > 1 - MYZERO))
+		printf("normal vector error %f\n", tmptest);
+
 	vector3d diff11;
 	vector3d diff21;
 	vector3d diff31;
@@ -11,7 +24,7 @@ int triangleCD(triangle *t1, triangle *t2)
 	vectorminus(&t2->vertex2, &(*t1).vertex1, &diff21);
 	vectorminus(&t2->vertex3, &(*t1).vertex1, &diff31);
 
-	float dot4, dot5, dot6;
+	double dot4, dot5, dot6;
 	vectordot(&diff11, &(*t1).normalvector, &dot4);
 	vectordot(&diff21, &(*t1).normalvector, &dot5);
 	vectordot(&diff31, &(*t1).normalvector, &dot6);
@@ -25,7 +38,7 @@ int triangleCD(triangle *t1, triangle *t2)
 	vectorminus(&(*t1).vertex2, &t2->vertex1, &diff21);
 	vectorminus(&t1->vertex3, &t2->vertex1, &diff31);
 
-	float dot1, dot2, dot3;
+	double dot1, dot2, dot3;
 	vectordot(&diff11, &t2->normalvector, &dot1);
 	vectordot(&diff21, &t2->normalvector, &dot2);
 	vectordot(&diff31, &t2->normalvector, &dot3);
@@ -37,7 +50,7 @@ int triangleCD(triangle *t1, triangle *t2)
 	
 	vector3d tangent;//slope of the intersection line
 	vector3d p;//one point in the intersection line
-	float s1, s2;
+	double s1, s2;
 	vectordot(&t1->vertex1, &t1->normalvector, &s1);
 	vectordot(&t2->vertex1, &t2->normalvector, &s2);
 	vectorcross(&t1->normalvector, &t2->normalvector, &tangent);
@@ -61,7 +74,7 @@ int triangleCD(triangle *t1, triangle *t2)
 		return 0;
 	}
 
-	float para1, para2, para3, para4;
+	double para1, para2, para3, para4;
 	vector3d tmp;
 	if ((dot1 < NEGATIVEZERO & dot2 > POSITIVEZERO & dot3 > POSITIVEZERO) ||
 	    (dot1 > POSITIVEZERO & dot2 < NEGATIVEZERO & dot3 < NEGATIVEZERO)) {
