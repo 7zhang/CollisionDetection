@@ -5,16 +5,16 @@
 // 0 if no collision
 int triangleCD(triangle *t1, triangle *t2)
 {
-	double tmptest;
-	tmptest = t1->normalvector.x * t1->normalvector.x + t1->normalvector.y * t1->normalvector.y + t1->normalvector.z * t1->normalvector.z;
+	/* double tmptest; */
+	/* tmptest = t1->normalvector.x * t1->normalvector.x + t1->normalvector.y * t1->normalvector.y + t1->normalvector.z * t1->normalvector.z; */
 	
-	if (!( tmptest < 1 + MYZERO && tmptest > 1 - MYZERO))
-		printf("normal vector error %f\n", tmptest);
+	/* if (!( tmptest < 1 + MYZERO && tmptest > 1 - MYZERO)) */
+	/* 	printf("normal vector error %f\n", tmptest); */
 
-	tmptest = t2->normalvector.x * t2->normalvector.x + t2->normalvector.y * t2->normalvector.y + t2->normalvector.z * t2->normalvector.z;
+	/* tmptest = t2->normalvector.x * t2->normalvector.x + t2->normalvector.y * t2->normalvector.y + t2->normalvector.z * t2->normalvector.z; */
 	
-	if (!( tmptest < 1 + MYZERO && tmptest > 1 - MYZERO))
-		printf("normal vector error %f\n", tmptest);
+	/* if (!( tmptest < 1 + MYZERO && tmptest > 1 - MYZERO)) */
+	/* 	printf("normal vector error %f\n", tmptest); */
 
 	vector3d diff11;
 	vector3d diff21;
