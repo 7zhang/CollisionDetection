@@ -54,6 +54,10 @@ int loadstl(const char *path, stldata *pstldata)
 		
 		iter++;
 	}
+
+	if (fread(&(tmp), 1, 1, file) == 1)
+		return 1;
+	
 	return 0;
 }
 

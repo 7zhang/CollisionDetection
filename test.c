@@ -9,12 +9,17 @@ int main(void)
 	stldata newgun;
 	stldata part;
 	
-	if (loadstl("robot_stl/newgun.STL", &newgun) != 0)
+	if (loadstl("robot_stl/newgun.STL", &newgun) != 0){
 		printf("load newgun stl error\n");
+		exit(1);
+	}
+		
 	
-	if (loadstl("robot_stl/Part.STL", &part) != 0)
+	if (loadstl("robot_stl/Part.STL", &part) != 0) {
 		printf("load part stl error!\n");
-
+		exit(1);
+	}
+		
 	printf("stlmodel1: %s, %d triangles\n", newgun.modelname, newgun.num);
 	printf("stlmodel2: %s, %d tirangles\n", part.modelname, part.num);
 	printf("starting collisiondetection...\n");

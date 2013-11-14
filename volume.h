@@ -32,7 +32,7 @@ typedef struct _volumenode {
 /* }volumenode; */
 
 //return 0 if no collision
-static inline bool volumecd(const volume *v1, const volume *v2)
+static inline int volumecd(const volume *v1, const volume *v2)
 {
 	if (v1->xmax < v2->xmin || v1->xmin > v2->xmax)
 		return 0;
@@ -43,11 +43,14 @@ static inline bool volumecd(const volume *v1, const volume *v2)
 	return 1;
 }
 
-void buildvolume(const triangle *t, volume *v);
-bool recurbuildtree(volumenode *stl);
+//build the volume
+int buildvolume(volumenode *vnode);
+
+//build the volume tree recursively
+int recurbuildtree(volumenode *vnode);
 
 //0 if success, 1 if false, 2 if error
-int triangleallocation(volumenode *parent, volumenode *left, volumenode *right);
+int triangleallocation(const volumenode *parent, volumenode *left, volumenode *right);
 #endif /* _VOLUME_H_ */
 
 
