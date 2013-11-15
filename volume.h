@@ -13,6 +13,7 @@ typedef struct _volumenode {
 	int tarraysize;
 	int *tindex;
 	int trianglenum;
+	int depth;
 	volume v;
 	int last;
 
@@ -47,10 +48,24 @@ static inline int volumecd(const volume *v1, const volume *v2)
 int buildvolume(volumenode *vnode);
 
 //build the volume tree recursively
-int recurbuildtree(volumenode *vnode);
+//return the depth if success, -1 if error
+int recurbuildtree(volumenode *vnode, int depth);
 
 //0 if success, 1 if false, 2 if error
 int triangleallocation(const volumenode *parent, volumenode *left, volumenode *right);
+
+//recursive cd
+int collision_detection(volumenode *vnode);
+
+//show triangle data
+void show_triangle(triangle *t, int index);
+
+//show the volume tree
+void recurshowtree(const volumenode *vnode, int depth);
+
+extern int volumecount;
+extern int maxdepth;
+
 #endif /* _VOLUME_H_ */
 
 
