@@ -13,6 +13,9 @@ int main(int argc, char *argv[])
 	triangle test6 = {{1/sqrt(11), 1/sqrt(11), 3/sqrt(11)}, {10, 0, 1}, {13, 0, 0}, {10, 3, 0}};
 	triangle test7 = {{1, 0, 0}, {0, 10000, 0}, {0, 10000+1, 0}, {0, 10000, 1}};
 	
+	triangle test8 = {{0.0, 0.0, 1.0}, {1916.150024, -236.330002, 1009.500000}, {1916.150024, 263.670013, 1009.500000}, {1516.150024, 263.670013, 1009.500000}};
+	triangle test9 = {{0.879605, 0.086934, 0.467694}, {1821.348755, 0.155291, 1009.083191}, {1790.851196, -0.000000, 1066.484375}, {1821.366821, -0.000000, 1009.092773}};
+
 	if (triangleCD(&test1, &test2) != 0) {
 		printf("test1 error\n");
 	} else {
@@ -42,7 +45,19 @@ int main(int argc, char *argv[])
 	} else {
 		printf("test5 passed\n");
 	}
-		
+
+	if (triangleCD(&test8, &test9) != 0) {
+		printf("test6 not passed\n");
+	} else {
+		printf("test6 passed\n");
+	}
+	
+	if (triangleCD(&test9, &test8) != 0) {
+		printf("test7 not passed\n");
+	} else {
+		printf("test7 passed\n");
+	}
+
 	return 0;
 }
 

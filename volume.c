@@ -17,6 +17,11 @@ int buildvolume(volumenode *vnode)
 	vtmp->zmin = ttmp->vertex1.z;
 	vtmp->zmax = ttmp->vertex1.z;
 
+	if (vnode->trianglenum == 0) {
+		printf("buildvolume error! vnode->trianglenum = 0\n");
+		return 1;
+	}
+
 	for (i = 0; i < vnode->trianglenum; ++i) {
 		if (vnode->tindex[i] >= vnode->tarraysize) {
 			printf("index error! vnode->tindex[%d] = %d, while vnode->trianglenum = %d\n",
@@ -66,6 +71,18 @@ int buildvolume(volumenode *vnode)
 			vtmp->zmax = ttmp->vertex3.z;
 	}
 
+	if (vnode->v.xmax - vnode->v.xmin < POSITIVEZERO && vnode->v.ymax - vnode->v.ymin < POSITIVEZERO && vnode->v.zmax - vnode->v.zmin < POSITIVEZERO) {
+		printf("error:x y z length all equal 0");
+	}
+
+	/* if (vnode->v.ymax - vnode->v.ymin < POSITIVEZERO) { */
+	/* 	printf("y length equal 0"); */
+	/* } */
+	
+	/* if (vnode->v.zmax - vnode->v.zmin < POSITIVEZERO) { */
+	/* 	printf("z length equal 0"); */
+	/* } */
+	
 	return 0;
 }
 
@@ -112,6 +129,7 @@ int recurbuildtree(volumenode *vnode, int depth)
 		}
 		
 		vnode->last = 0;
+		last_count++;
 		
 		left->parent = vnode;
 		right->parent = vnode;
@@ -137,14 +155,15 @@ int recurbuildtree(volumenode *vnode, int depth)
 				return -1;
 			}
 		}
-
 		
 		return 0;
 	case 1:
 		free(left);
 		free(right);
 		vnode->last = 1;
-		printf("depth = %d\n", depth);
+		vnode->child1 = NULL;
+		vnode->child2 = NULL;
+		/* printf("depth = %d\n", depth); */
 
 		return 0;		
 	case 2:
@@ -195,25 +214,23 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 	memset(tmp2, 0, sizeof(int) * parent->trianglenum);
 
 	//try x axis
-	int len1, len2, len3;
+	double len1, len2, len3;
 	
 	len1 = parent->v.xmax - parent->v.xmin;
 	len2 = parent->v.ymax - parent->v.ymin;
 	len3 = parent->v.zmax - parent->v.zmin;
 
-	/* if (len1 < POSITIVEZERO || len2 < POSITIVEZERO || len3 < POSITIVEZERO) */
-	/* {	 */
-	/* 	free(tmp1); */
-	/* 	free(tmp2); */
-	/* 	left->tindex = NULL; */
-	/* 	left->trianglenum = 0; */
-	/* 	right->tindex = NULL; */
-	/* 	right->trianglenum = 0;	 */
+	if (len1 < MYZERO && len2 < MYZERO && len3 < MYZERO)
+	{
+		/* free(tmp1); */
+		/* free(tmp2); */
+		/* left->tindex = NULL; */
+		/* left->trianglenum = 0; */
+		/* right->tindex = NULL; */
+		/* right->trianglenum = 0; */
 	
-	/* 	printf("fatal error!\n"); */
-
-	/* 	return 2; */
-	/* } */
+		printf("fatal error!\n");
+	}
 
 	int seq[3];
 	if (len1 > len2 && len2 > len3) {
@@ -264,6 +281,10 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 				centerx = (parent->tarry[parent->tindex[j]].vertex1.x
 					+ parent->tarry[parent->tindex[j]].vertex2.x
 					  + parent->tarry[parent->tindex[j]].vertex3.x)/3.0;
+
+				/* if (parent->tindex[j] == 897) */
+				/* 	printf("897\n"); */
+				
 				if (centerx < middlex) {
 					leftcount++;
 					tmp1[leftcount-1] = parent->tindex[j];
@@ -285,6 +306,10 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 				centery = (parent->tarry[parent->tindex[j]].vertex1.y
 					+ parent->tarry[parent->tindex[j]].vertex2.y
 					  + parent->tarry[parent->tindex[j]].vertex3.y)/3.0;
+				
+				/* if (parent->tindex[j] == 897) */
+				/* 	printf("897\n"); */
+				
 				if (centery < middley) {
 					leftcount++;
 					tmp1[leftcount-1] = parent->tindex[j];
@@ -306,6 +331,10 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 				centerz = (parent->tarry[parent->tindex[j]].vertex1.z
 					+ parent->tarry[parent->tindex[j]].vertex2.z
 					  + parent->tarry[parent->tindex[j]].vertex3.z)/3.0;
+
+				/* if (parent->tindex[j] == 897) */
+				/* 	printf("897\n"); */
+				
 				if (centerz < middlez) {
 					leftcount++;
 					tmp1[leftcount-1] = parent->tindex[j];
@@ -332,22 +361,22 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 	}
 
 	if (success == 0) {
-		printf("can't split!\n");
-		printf("parent->trianglenum = %d\n", parent->trianglenum);
-		printf("leftcount = %d, tmp1[0] = %d, tmp1[leftcount-1] = %d\n",
-		       leftcount, tmp1[0], tmp1[leftcount-1]);
-		printf("rightcount = %d, tmp2[0] = %d, tmp2[rightcount-1] = %d\n",
-		       rightcount, tmp2[0], tmp2[rightcount-1]);
+		/* printf("can't split!\n"); */
+		/* printf("parent->trianglenum = %d\n", parent->trianglenum); */
+		/* printf("leftcount = %d, tmp1[0] = %d, tmp1[leftcount-1] = %d\n", */
+		/*        leftcount, tmp1[0], tmp1[leftcount-1]); */
+		/* printf("rightcount = %d, tmp2[0] = %d, tmp2[rightcount-1] = %d\n", */
+		/*        rightcount, tmp2[0], tmp2[rightcount-1]); */
 
-		if (leftcount > 0 || rightcount > 0) {
-			printf("len1 = %f, len2 = %f, len3 = %f\n", len1, len2, len3);
-			for (i = 0; i < leftcount; ++i) 
-				show_triangle(parent->tarry, tmp1[i]);
-		}
+		/* if (leftcount > 0 || rightcount > 0) { */
+		/* 	printf("len1 = %lf, len2 = %lf, len3 = %lf\n", len1, len2, len3); */
+		/* 	for (i = 0; i < leftcount; ++i)  */
+		/* 		show_triangle(parent->tarry, tmp1[i]); */
+		/* } */
 
-		if (parent->trianglenum > 30) {
-			printf("parent->trianglenum too large: %d\n", parent->trianglenum);
-		}
+		/* if (parent->trianglenum > 30) { */
+		/* 	printf("parent->trianglenum too large: %d\n", parent->trianglenum); */
+		/* } */
 		
 
 
@@ -439,10 +468,71 @@ void show_triangle(triangle *t, int index)
 	printf("vertex3: x = %f, y = %f, z = %f\n", t[index].vertex3.x, t[index].vertex3.y, t[index].vertex3.z);
 }
 
+int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2)
+{
+	if (vnode1 == NULL || vnode2 == NULL) {
+		return 0;
+	}	
+	
+	cdcount++;
+	int tmp;
+	int i, j;
+	int collision_flag = 0;
+	if (volumecd(&vnode1->v, &vnode2->v)) {
+		tmp = vnode1->last + vnode2->last * 2;
+		switch(tmp) {
+		case 0:
+			return (collision_detection_recur(vnode1->child1, vnode2->child1) ||
+				collision_detection_recur(vnode1->child1, vnode2->child2) ||
+				collision_detection_recur(vnode1->child2, vnode2->child1) ||
+				collision_detection_recur(vnode1->child2, vnode2->child2));
+		case 1:
+			return (collision_detection_recur(vnode1, vnode2->child1) ||
+				collision_detection_recur(vnode1, vnode2->child2));
+		case 2:
+			return (collision_detection_recur(vnode1->child1, vnode2) ||
+				collision_detection_recur(vnode1->child2, vnode2));
+		case 3:
+			triangle_cd_count++;
+
+			if (vnode1->trianglenum < 1 || vnode2->trianglenum < 1) 
+				printf("number error!\n");
+			
+			for (i = 0; i < vnode1->trianglenum; ++i) {
+				for (j = 0; j < vnode2->trianglenum; ++j) {
+//					if (vnode1->tindex[i] == 897 &&  vnode2->tindex[j] == 57812)
+					/* printf("tindex[i] = %d, tindex[j] = %d\n", */
+					/*        vnode1->tindex[i], vnode2->tindex[j]); */
 
 
 
+					collision_flag = triangleCD(&vnode1->tarry[vnode1->tindex[i]],
+								    &vnode2->tarry[vnode2->tindex[j]]);
+					if (collision_flag) {
+						printf("triangle collision!index1 = %d, index2 = %d\n",
+						       vnode1->tindex[i], vnode2->tindex[j]);
+						break;
+					}
+				}
+				if (collision_flag) 
+					break;
+			}
 
+			if (collision_flag) 
+				return 1;
+			
+			return 0;
+		default:
+			printf("vnode->last error!vnode1->last = %d, vnode2->last = %d\n",
+			       vnode1->last, vnode2->last);
+			return 2;
+		}
+	}
+
+	printf("novolumecd!\n");
+	
+	return 0;
+}
 
 
 

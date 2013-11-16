@@ -20,22 +20,22 @@ int triangleCD(triangle *t1, triangle *t2)
 	vector3d diff21;
 	vector3d diff31;
 
-	vectorminus(&t2->vertex1, &(*t1).vertex1, &diff11);
-	vectorminus(&t2->vertex2, &(*t1).vertex1, &diff21);
-	vectorminus(&t2->vertex3, &(*t1).vertex1, &diff31);
+	vectorminus(&t2->vertex1, &t1->vertex1, &diff11);
+	vectorminus(&t2->vertex2, &t1->vertex1, &diff21);
+	vectorminus(&t2->vertex3, &t1->vertex1, &diff31);
 
 	double dot4, dot5, dot6;
-	vectordot(&diff11, &(*t1).normalvector, &dot4);
-	vectordot(&diff21, &(*t1).normalvector, &dot5);
-	vectordot(&diff31, &(*t1).normalvector, &dot6);
+	vectordot(&diff11, &t1->normalvector, &dot4);
+	vectordot(&diff21, &t1->normalvector, &dot5);
+	vectordot(&diff31, &t1->normalvector, &dot6);
 
 	if ((dot4 > POSITIVEZERO && dot5 > POSITIVEZERO && dot6 > POSITIVEZERO) ||
 	    (dot4 < NEGATIVEZERO && dot5 < NEGATIVEZERO && dot6 < NEGATIVEZERO)) {
 		return 0;
 	}
 	
-	vectorminus(&(*t1).vertex1, &t2->vertex1, &diff11);
-	vectorminus(&(*t1).vertex2, &t2->vertex1, &diff21);
+	vectorminus(&t1->vertex1, &t2->vertex1, &diff11);
+	vectorminus(&t1->vertex2, &t2->vertex1, &diff21);
 	vectorminus(&t1->vertex3, &t2->vertex1, &diff31);
 
 	double dot1, dot2, dot3;

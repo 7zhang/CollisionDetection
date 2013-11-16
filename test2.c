@@ -2,7 +2,14 @@
 #include <stdlib.h>
 #include "loadstl.h"
 #include "triangleCD.h"
-#include "Transform.h"
+#include "volume.h"
+//#include "Transform.h"
+
+int volumecount = 0;
+int maxdepth = 0;
+int cdcount = 0;
+int last_count = 0;
+int triangle_cd_count = 0;
 
 int main(void)
 {
@@ -36,9 +43,13 @@ int main(void)
 	
 	if (collision == 1) {
 		printf("collision detected!\n");
+		printf("i = %d, j = %d\n", i, j);
 	} else {
 		printf("no collision\n");
 	}
+	
+	show_triangle(part.ptriangle, 897);
+	show_triangle(newgun.ptriangle, 57812);
 
 	free(newgun.ptriangle);
 	free(part.ptriangle);
