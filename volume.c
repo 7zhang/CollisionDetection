@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "volume.h"
+#include "triangleCD.h"
 #include "geom.h"
-
-
 
 /* use the tarray and tindex to build the volume v
  */
@@ -149,7 +148,7 @@ void update_volume(const matrix m, const vector3d *v, const volume *from, volume
 	}
 }
 
-int recurbuildtree(volumenode *vnode, int depth)
+int recurbuildtree(volumenode *vnode, int depth, matrix m, vector3d *vector)
 {
 	volumenode *left = (volumenode *)malloc(sizeof(volumenode));
 	volumenode *right = (volumenode *)malloc(sizeof(volumenode));
@@ -204,6 +203,8 @@ int recurbuildtree(volumenode *vnode, int depth)
 		
 		vnode->child1 = left;
 		vnode->child2 = right;
+		vnode->m = m;
+		vnode->vector = vector;
 		
 		free(vnode->tindex);
 		vnode->trianglenum = 0;
@@ -550,6 +551,14 @@ int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2
 	int tmp;
 	int i, j;
 	int collision_flag = 0;
+
+	volume volume_tmp1, volume_tmp2;
+
+	update_volume(vnode1->m, vnode1->vector, &vnode1->v, &volume_tmp1);
+	update_volume(vnode2->m, vnode2->vector, &vnode2->v, &volume_tmp2);
+	
+	triangle triangle_tmp1, triangle_tmp2;
+
 	if (volumecd(&vnode1->v, &vnode2->v)) {
 		tmp = vnode1->last + vnode2->last * 2;
 		switch(tmp) {
@@ -573,9 +582,12 @@ int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2
 #endif		
 			for (i = 0; i < vnode1->trianglenum; ++i) {
 				for (j = 0; j < vnode2->trianglenum; ++j) {
-
-					collision_flag = triangleCD(&vnode1->tarry[vnode1->tindex[i]],
-								    &vnode2->tarry[vnode2->tindex[j]]);
+					triangle_transform(vnode1->m, vnode1->vector,
+							   &vnode1->tarry[vnode1->tindex[i]], &triangle_tmp1);
+					triangle_transform(vnode2->m, vnode2->vector,
+							   &vnode2->tarry[vnode2->tindex[j]], &triangle_tmp2);
+					
+					collision_flag = triangleCD(&triangle_tmp1, &triangle_tmp2);
 					if (collision_flag) {
 #ifdef DEBUG
 						printf("triangle collision!index1 = %d, index2 = %d\n",

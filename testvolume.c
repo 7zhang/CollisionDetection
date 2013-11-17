@@ -4,6 +4,7 @@
 #include "volume.h"
 #include "loadstl.h"
 #include "triangleCD.h"
+#include "Transform.h"
 
 int maxdepth = 0;
 
@@ -58,9 +59,30 @@ int main(int argc, char *argv[])
 	volumecount++;
 #endif
 
+	JAngle robotangle(0.0, -25.00, 65.00, 0.00, 0.00, 0.00);
+	JAngle exangle(0.00, 0.00, 0.00, 0.00, 0.00, 0.00);
+	
+
+	TRANS j0_trans = Transform::getTransWorldToBase(exangle);
+	TRANS j1_trans, j2_trans, j3_trans, j4_trans, j5_trans, j6_trans;
+	TRANS part_trans, newgun_trans;
+
+	Transform::getTransBaseToJoints(robotangle, j1_trans, j2_trans, j3_trans, j4_trans, j5_trans, j6_trans);
+	newgun_trans = Transform::getTrans6ToGun();
+	
+	j1_trans = j0_trans * j1_trans;
+	j2_trans = j0_trans * j2_trans;
+	j3_trans = j0_trans * j3_trans;
+	j4_trans = j0_trans * j4_trans;
+	j5_trans = j0_trans * j5_trans;
+	j6_trans = j0_trans * j6_trans;
+	newgun_trans = j6_trans * newgun_trans;
+	
+	part_trans = Transform::getTransWorldToWorkpiece(exangle);
+	
 	maxdepth = 10;
 
-	if (recurbuildtree(&left_top_node, 0) == -1) 
+	if (recurbuildtree(&left_top_node, 0, newgun_trans.rot.mem, ) == -1) 
 		printf("recurbuildtree error!\n");
 
 #ifdef DEBUG

@@ -15,11 +15,12 @@ void tran(TRANS *t, stldata *stlfrom, stldata *stlto)
 {
 	int i;
 	vector3d tvec1;
+
+	tvec1.x = t->pos.dx;
+	tvec1.y = t->pos.dy;
+	tvec1.z = t->pos.dz;
+
 	for (i = 0; i < stlfrom->num; ++i) {
-		tvec1.x = t->pos.dx;
-		tvec1.y = t->pos.dy;
-		tvec1.z = t->pos.dz;
-		
 		triangle_transform(t->rot.mem, &tvec1, &stlfrom->ptriangle[i], &stlto->ptriangle[i]);
 		stlto->ptriangle[i].attr = stlfrom->ptriangle[i].attr;
 	}

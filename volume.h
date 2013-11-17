@@ -21,6 +21,9 @@ typedef struct _volumenode {
 	struct _volumenode *child1, *child2;
 	struct _volumenode *left, *right;
 
+	matrix m;
+	vector3d *vector;
+
 //mutable element during collision detection
 	int cdflag;
 	struct _volumenode *cdvolumelist;
@@ -44,7 +47,7 @@ int buildvolume(volumenode *vnode);
 
 //build the volume tree recursively
 //return the depth if success, -1 if error
-int recurbuildtree(volumenode *vnode, int depth);
+int recurbuildtree(volumenode *vnode, int depth, matrix m, vector3d *vector);
 
 //0 if success, 1 if false, 2 if error
 int triangleallocation(const volumenode *parent, volumenode *left, volumenode *right);
