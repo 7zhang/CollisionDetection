@@ -20,7 +20,7 @@ void tran(TRANS *t, stldata *stlfrom, stldata *stlto)
 		tvec1.y = t->pos.dy;
 		tvec1.z = t->pos.dz;
 		
-		coordinatetransform(t->rot.mem, &tvec1, &stlfrom->ptriangle[i], &stlto->ptriangle[i]);
+		triangle_transform(t->rot.mem, &tvec1, &stlfrom->ptriangle[i], &stlto->ptriangle[i]);
 		stlto->ptriangle[i].attr = stlfrom->ptriangle[i].attr;
 	}
 }

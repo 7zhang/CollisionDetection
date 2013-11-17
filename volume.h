@@ -30,7 +30,6 @@ typedef struct _volumenode {
 //return 0 if no collision
 static inline int volumecd(const volume *v1, const volume *v2)
 {
-	return 1;
 	if (v1->xmax < v2->xmin || v1->xmin > v2->xmax)
 		return 0;
 	if (v1->ymax < v2->ymin || v1->ymin > v2->ymax)
@@ -59,11 +58,14 @@ void show_triangle(triangle *t, int index);
 //show the volume tree
 void recurshowtree(const volumenode *vnode, int depth);
 
-extern int volumecount;
 extern int maxdepth;
+
+#ifdef DEBUG
+extern int volumecount;
 extern int cdcount;
 extern int last_count;
 extern int triangle_cd_count;
+#endif
 
 #endif /* _VOLUME_H_ */
 

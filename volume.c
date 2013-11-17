@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "volume.h"
+#include "geom.h"
+
+
 
 /* use the tarray and tindex to build the volume v
  */
@@ -17,17 +20,22 @@ int buildvolume(volumenode *vnode)
 	vtmp->zmin = ttmp->vertex1.z;
 	vtmp->zmax = ttmp->vertex1.z;
 
+#ifdef DEBUG
 	if (vnode->trianglenum == 0) {
 		printf("buildvolume error! vnode->trianglenum = 0\n");
 		return 1;
 	}
+#endif
 
 	for (i = 0; i < vnode->trianglenum; ++i) {
+
+#ifdef DEBUG
 		if (vnode->tindex[i] >= vnode->tarraysize) {
 			printf("index error! vnode->tindex[%d] = %d, while vnode->trianglenum = %d\n",
 			       i, vnode->tindex[i], vnode->trianglenum);
 			return 1;
 		}
+#endif
 		  
 		ttmp = &vnode->tarry[vnode->tindex[i]];
 
@@ -71,9 +79,11 @@ int buildvolume(volumenode *vnode)
 			vtmp->zmax = ttmp->vertex3.z;
 	}
 
+#ifdef DEBUG
 	if (vnode->v.xmax - vnode->v.xmin < POSITIVEZERO && vnode->v.ymax - vnode->v.ymin < POSITIVEZERO && vnode->v.zmax - vnode->v.zmin < POSITIVEZERO) {
 		printf("error:x y z length all equal 0");
 	}
+#endif
 
 	/* if (vnode->v.ymax - vnode->v.ymin < POSITIVEZERO) { */
 	/* 	printf("y length equal 0"); */
@@ -86,16 +96,71 @@ int buildvolume(volumenode *vnode)
 	return 0;
 }
 
+void update_volume(const matrix m, const vector3d *v, const volume *from, volume *to)
+{
+	vector3d updated_vertex[8];
+	
+	vector3d tmp1 = {from->xmin, from->ymin, from->zmin};
+	vector3d tmp2 = {from->xmax, from->ymin, from->zmin};
+	vector3d tmp3 = {from->xmin, from->ymax, from->zmin};
+	vector3d tmp4 = {from->xmin, from->ymin, from->zmax};
+	
+	point_transform(m, v, &tmp1, &updated_vertex[0]);
+	point_transform(m, v, &tmp2, &updated_vertex[1]);
+	point_transform(m, v, &tmp3, &updated_vertex[2]);
+	point_transform(m, v, &tmp4, &updated_vertex[3]);
+
+	vector3d buffer1, buffer2, buffer3;
+	
+	vectorminus(&updated_vertex[1], &updated_vertex[0], &buffer1);
+	vectorminus(&updated_vertex[2], &updated_vertex[0], &buffer2);
+	vectorminus(&updated_vertex[3], &updated_vertex[0], &buffer3);
+
+	vectoradd(&buffer1, &updated_vertex[3], &updated_vertex[4]);
+	vectoradd(&buffer2, &updated_vertex[1], &updated_vertex[5]);
+	vectoradd(&buffer2, &updated_vertex[3], &updated_vertex[6]);
+	vectoradd(&buffer3, &updated_vertex[5], &updated_vertex[7]);
+
+	int i;
+	vector3d *tmp;
+
+	to->xmin = updated_vertex[0].x;
+	to->xmax = updated_vertex[0].x;
+	to->ymin = updated_vertex[0].y;
+	to->ymax = updated_vertex[0].y;
+	to->zmin = updated_vertex[0].z;
+	to->zmax = updated_vertex[0].z;
+
+	for (i = 0; i < 8; ++i) {
+		tmp = &updated_vertex[i];
+
+		if (tmp->x < to->xmin)
+			to->xmin = tmp->x;
+		if (tmp->x > to->xmax)
+			to->xmax = tmp->x;
+		if (tmp->y < to->ymin)
+			to->ymin = tmp->y;
+		if (tmp->y > to->ymax)
+			to->ymax = tmp->y;
+		if (tmp->z < to->zmin)
+			to->zmin = tmp->z;
+		if (tmp->z > to->zmax)
+			to->zmax = tmp->z;
+	}
+}
+
 int recurbuildtree(volumenode *vnode, int depth)
 {
 	volumenode *left = (volumenode *)malloc(sizeof(volumenode));
 	volumenode *right = (volumenode *)malloc(sizeof(volumenode));
 	
+#ifdef DEBUG
 	if (left == NULL || right == NULL) {
 		printf("recurbuildtree malloc error!\n");
 		return -1;
 	}
-		
+#endif
+	
 	memset(left, 0, sizeof(volumenode));
 	memset(right, 0, sizeof(volumenode));
 
@@ -129,7 +194,10 @@ int recurbuildtree(volumenode *vnode, int depth)
 		}
 		
 		vnode->last = 0;
+
+#ifdef DEBUG
 		last_count++;
+#endif
 		
 		left->parent = vnode;
 		right->parent = vnode;
@@ -139,8 +207,9 @@ int recurbuildtree(volumenode *vnode, int depth)
 		
 		free(vnode->tindex);
 		vnode->trianglenum = 0;
-
+#ifdef DEBUG
 		volumecount += 2;
+#endif
 
 		if (depth < maxdepth) {
 			if (recurbuildtree(left, depth + 1) == -1) {
@@ -220,6 +289,7 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 	len2 = parent->v.ymax - parent->v.ymin;
 	len3 = parent->v.zmax - parent->v.zmin;
 
+#ifdef DEBUG
 	if (len1 < MYZERO && len2 < MYZERO && len3 < MYZERO)
 	{
 		/* free(tmp1); */
@@ -231,6 +301,7 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 	
 		printf("fatal error!\n");
 	}
+#endif
 
 	int seq[3];
 	if (len1 > len2 && len2 > len3) {
@@ -377,8 +448,6 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 		/* if (parent->trianglenum > 30) { */
 		/* 	printf("parent->trianglenum too large: %d\n", parent->trianglenum); */
 		/* } */
-		
-
 
 		left->tindex = NULL;
 		right->tindex = NULL;
@@ -472,9 +541,12 @@ int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2
 {
 	if (vnode1 == NULL || vnode2 == NULL) {
 		return 0;
-	}	
+	}
 	
+#ifdef DEBUG
 	cdcount++;
+#endif
+	
 	int tmp;
 	int i, j;
 	int collision_flag = 0;
@@ -493,24 +565,22 @@ int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2
 			return (collision_detection_recur(vnode1->child1, vnode2) ||
 				collision_detection_recur(vnode1->child2, vnode2));
 		case 3:
+#ifdef DEBUG
 			triangle_cd_count++;
 
 			if (vnode1->trianglenum < 1 || vnode2->trianglenum < 1) 
 				printf("number error!\n");
-			
+#endif		
 			for (i = 0; i < vnode1->trianglenum; ++i) {
 				for (j = 0; j < vnode2->trianglenum; ++j) {
-//					if (vnode1->tindex[i] == 897 &&  vnode2->tindex[j] == 57812)
-					/* printf("tindex[i] = %d, tindex[j] = %d\n", */
-					/*        vnode1->tindex[i], vnode2->tindex[j]); */
-
-
 
 					collision_flag = triangleCD(&vnode1->tarry[vnode1->tindex[i]],
 								    &vnode2->tarry[vnode2->tindex[j]]);
 					if (collision_flag) {
+#ifdef DEBUG
 						printf("triangle collision!index1 = %d, index2 = %d\n",
 						       vnode1->tindex[i], vnode2->tindex[j]);
+#endif
 						break;
 					}
 				}
@@ -523,14 +593,19 @@ int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2
 			
 			return 0;
 		default:
+#ifdef DEBUG
 			printf("vnode->last error!vnode1->last = %d, vnode2->last = %d\n",
 			       vnode1->last, vnode2->last);
+#endif
+
 			return 2;
 		}
 	}
 
-	printf("novolumecd!\n");
-	
+#ifdef DEBUG
+//	printf("novolumecd!\n");
+#endif
+
 	return 0;
 }
 

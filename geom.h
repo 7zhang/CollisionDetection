@@ -69,38 +69,35 @@ static inline double commonpoint(vector3d *p1, vector3d *tangent1, vector3d *p2,
 		/ (tangent1->x * tangent2->y - tangent1->y * tangent2->x);
 }
 
-static inline void coordinatetransform(const matrix m, const vector3d *vec, const triangle *original, triangle *point)
+static inline void point_transform(const matrix m, const vector3d *vec, const vector3d *from, vector3d *to)
 {
-	point->normalvector.x = m[0][0] * original->normalvector.x
-		+ m[0][1] * original->normalvector.y + m[0][2] * original->normalvector.z;
-	point->normalvector.y = m[1][0] * original->normalvector.x
-		+ m[1][1] * original->normalvector.y + m[1][2] * original->normalvector.z;
-	point->normalvector.z = m[2][0] * original->normalvector.x
-		+ m[2][1] * original->normalvector.y + m[2][2] * original->normalvector.z;
-
-	point->vertex1.x = m[0][0] * original->vertex1.x
-		+ m[0][1] * original->vertex1.y + m[0][2] * original->vertex1.z + vec->x;
-	point->vertex1.y = m[1][0] * original->vertex1.x
-		+ m[1][1] * original->vertex1.y + m[1][2] * original->vertex1.z + vec->y;
-	point->vertex1.z = m[2][0] * original->vertex1.x
-		+ m[2][1] * original->vertex1.y + m[2][2] * original->vertex1.z + vec->z;
-
-	point->vertex2.x = m[0][0] * original->vertex2.x
-		+ m[0][1] * original->vertex2.y + m[0][2] * original->vertex2.z + vec->x;
-	point->vertex2.y = m[1][0] * original->vertex2.x
-		+ m[1][1] * original->vertex2.y + m[1][2] * original->vertex2.z + vec->y;
-	point->vertex2.z = m[2][0] * original->vertex2.x
-		+ m[2][1] * original->vertex2.y + m[2][2] * original->vertex2.z + vec->z;
-
-	point->vertex3.x = m[0][0] * original->vertex3.x
-		+ m[0][1] * original->vertex3.y + m[0][2] * original->vertex3.z + vec->x;
-	point->vertex3.y = m[1][0] * original->vertex3.x
-		+ m[1][1] * original->vertex3.y + m[1][2] * original->vertex3.z + vec->y;
-	point->vertex3.z = m[2][0] * original->vertex3.x
-		+ m[2][1] * original->vertex3.y + m[2][2] * original->vertex3.z + vec->z;
+	to->x = m[0][0] * from->x
+		+ m[0][1] * from->y + m[0][2] * from->z + vec->x;
+	to->y = m[1][0] * from->x
+		+ m[1][1] * from->y + m[1][2] * from->z + vec->y;
+	to->z = m[2][0] * from->x
+		+ m[2][1] * from->y + m[2][2] * from->z + vec->z;
 }
 
+static inline void triangle_transform(const matrix m, const vector3d *vec, const triangle *from, triangle *to)
+{
+	vector3d tmp = {0.0, 0.0, 0.0};
 
+	point_transform(m, &tmp, &from->normalvector, &to->normalvector);
+	point_transform(m, vec, &from->vertex1, &to->vertex1);
+	point_transform(m, vec, &from->vertex2, &to->vertex2);
+	point_transform(m, vec, &from->vertex3, &to->vertex3);
+}
 
 #endif /* _GEOM_H_ */
+
+
+
+
+
+
+
+
+
+
 

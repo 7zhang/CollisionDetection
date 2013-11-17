@@ -120,11 +120,18 @@ int triangleCD(triangle *t1, triangle *t2)
 		return 0;
 	}
 	
-	if ( (MAX(para1, para2) < MAX(para3, para4) + MYZERO && MAX(para1, para2) > MIN(para3, para4) - MYZERO) ||
-	     (MIN(para1, para2) < MAX(para3, para4) + MYZERO && MIN(para1, para2) > MIN(para3, para4) - MYZERO) ) {
-		return 1;
-	}
+	double min1, min2, max1, max2;
+	min1 = MIN(para1, para2) - MYZERO;
+	max1 = MAX(para1, para2) + MYZERO;
+	min2 = MIN(para3, para4) - MYZERO;
+	max2 = MAX(para3, para4) + MYZERO;
 
+	if (para1 < max2 && para1 > min2 ||
+	    para2 < max2 && para2 > min2 ||
+	    para3 < max1 && para3 > min1 ||
+	    para4 < max1 && para4 > min1)
+		return 1;
+	
 	return 0;
 }
 
