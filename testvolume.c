@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	volumecount++;
 #endif
 
-	JAngle robotangle(0.0, -25.00, 65.00, 0.00, 0.00, 0.00);
+	JAngle robotangle(0.0, -10.00, 62.00, 0.00, 0.00, 0.00);
 	JAngle exangle(0.00, 0.00, 0.00, 0.00, 0.00, 0.00);
 	
 
@@ -82,14 +82,28 @@ int main(int argc, char *argv[])
 	
 	maxdepth = 10;
 
-	if (recurbuildtree(&left_top_node, 0, newgun_trans.rot.mem, ) == -1) 
+	vector3d tmp1, tmp2;
+	tmp1.x = newgun_trans.pos.dx;
+	tmp1.y = newgun_trans.pos.dy;
+	tmp1.z = newgun_trans.pos.dz;
+
+	tmp2.x = part_trans.pos.dx;
+	tmp2.y = part_trans.pos.dy;
+	tmp2.z = part_trans.pos.dz;
+	
+	left_top_node.m = (double *)newgun_trans.rot.mem;
+	left_top_node.vector = &tmp1;
+	right_top_node.m = (double *)part_trans.rot.mem;
+	right_top_node.vector = &tmp2;
+
+	if (recurbuildtree(&left_top_node, 0, newgun_trans.rot.mem, &tmp1) == -1) 
 		printf("recurbuildtree error!\n");
 
 #ifdef DEBUG
 	printf("volumecount1 = %d, lastcount1 = %d\n", volumecount, last_count);
 #endif
 
-	if (recurbuildtree(&right_top_node, 0) == -1) 
+	if (recurbuildtree(&right_top_node, 0, part_trans.rot.mem, &tmp2) == -1) 
 		printf("recurbuildtree error!\n");
 #ifdef DEBUG	
 	printf("volumecount2 = %d, lastcount2 = %d\n", volumecount, last_count);

@@ -21,7 +21,7 @@ typedef struct _volumenode {
 	struct _volumenode *child1, *child2;
 	struct _volumenode *left, *right;
 
-	matrix m;
+	double *m;
 	vector3d *vector;
 
 //mutable element during collision detection
