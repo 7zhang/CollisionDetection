@@ -19,15 +19,15 @@ typedef struct _volumenode {
 
 	struct _volumenode *parent;
 	struct _volumenode *child1, *child2;
-	struct _volumenode *left, *right;
+	/* struct _volumenode *left, *right; */
 
 	double *m;
 	vector3d *vector;
 
-//mutable element during collision detection
-	int cdflag;
-	struct _volumenode *cdvolumelist;
-	int volumenum;
+/* //mutable element during collision detection */
+/* 	int cdflag; */
+/* 	struct _volumenode *cdvolumelist; */
+/* 	int volumenum; */
 }volumenode;
 
 //return 0 if no collision
@@ -47,19 +47,26 @@ int buildvolume(volumenode *vnode);
 
 //build the volume tree recursively
 //return the depth if success, -1 if error
-int recurbuildtree(volumenode *vnode, int depth, matrix m, vector3d *vector);
+int recurbuildtree(volumenode *vnode, int depth);
 
 //0 if success, 1 if false, 2 if error
 int triangleallocation(const volumenode *parent, volumenode *left, volumenode *right);
 
 //recursive cd
-int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2);
+int collision_detection_recur(const volumenode *left_node, const volumenode *right_node);
 
 //show triangle data
 void show_triangle(triangle *t, int index);
 
 //show the volume tree
 void recurshowtree(const volumenode *vnode, int depth);
+
+//cd initialization
+int cd_init(char *path1, volumenode *left_top_node,
+	    char *path2, volumenode *right_top_node);
+
+//finish cd, release memory
+int cd_finish(volumenode *vnode);
 
 extern int maxdepth;
 
@@ -69,6 +76,8 @@ extern int cdcount;
 extern int last_count;
 extern int triangle_cd_count;
 #endif
+
+#define MAXTRIANGLE 3
 
 #endif /* _VOLUME_H_ */
 

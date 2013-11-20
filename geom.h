@@ -89,7 +89,43 @@ static inline void triangle_transform(const matrix m, const vector3d *vec, const
 	point_transform(m, vec, &from->vertex3, &to->vertex3);
 }
 
+static inline void swap(double *a, double *b)
+{
+	double tmp;
+	tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+static inline void transpose(matrix m)
+{
+	swap(&m[0][1], &m[1][0]);
+	swap(&m[0][2], &m[2][0]);
+	swap(&m[1][2], &m[2][1]);
+}
+
+static inline void matrix_multiply(const matrix left, const matrix right, matrix ret)
+{
+	ret[0][0] = left[0][0] * right[0][0] + left[0][1] * right[1][0] + left[0][2] * right[2][0];
+	ret[0][1] = left[0][0] * right[0][1] + left[0][1] * right[1][1] + left[0][2] * right[2][1];
+	ret[0][2] = left[0][0] * right[0][2] + left[0][1] * right[1][2] + left[0][2] * right[2][2];
+
+	ret[1][0] = left[1][0] * right[0][0] + left[1][1] * right[1][0] + left[1][2] * right[2][0];
+	ret[1][1] = left[1][0] * right[0][1] + left[1][1] * right[1][1] + left[1][2] * right[2][1];
+	ret[1][2] = left[1][0] * right[0][2] + left[1][1] * right[1][2] + left[1][2] * right[2][2];
+
+	ret[2][0] = left[2][0] * right[0][0] + left[2][1] * right[1][0] + left[2][2] * right[2][0];
+	ret[2][1] = left[2][0] * right[0][1] + left[2][1] * right[1][1] + left[2][2] * right[2][1];
+	ret[2][2] = left[2][0] * right[0][2] + left[2][1] * right[1][2] + left[2][2] * right[2][2];
+}
+
 #endif /* _GEOM_H_ */
+
+
+
+
+
+
 
 
 
