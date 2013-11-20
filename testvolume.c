@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 	clock_t start, end;
 	start = clock();
 
-	for (i = 0; i < 1; ++i) {
+	for (i = 0; i < 100; ++i) {
 #ifdef DEBUG
 		if (collision_detection_recur(&left_top_node, &right_top_node)) {
 			printf("collision detected!\n");

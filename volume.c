@@ -226,8 +226,13 @@ int recurbuildtree(volumenode *vnode, int depth, matrix m, vector3d *vector)
 				       right->trianglenum);
 				return -1;
 			}
+		} else {
+			left->last = 1;
+			right->last = 1;
+
+			return 0;
 		}
-		
+
 		return 0;
 	case 1:
 		free(left);
@@ -582,8 +587,6 @@ int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2
 				collision_detection_recur(vnode1->child2, vnode2));
 		case 3:
 #ifdef DEBUG
-			triangle_cd_count++;
-
 			if (vnode1->trianglenum < 1 || vnode2->trianglenum < 1) 
 				printf("number error!\n");
 #endif		
@@ -593,12 +596,17 @@ int collision_detection_recur(const volumenode *vnode1, const volumenode *vnode2
 							   &vnode1->tarry[vnode1->tindex[i]], &triangle_tmp1);
 					triangle_transform((double (*)[3])vnode2->m, vnode2->vector,
 							   &vnode2->tarry[vnode2->tindex[j]], &triangle_tmp2);
+#ifdef DEBUG
+			triangle_cd_count++;
+#endif
 					
 					collision_flag = triangleCD(&triangle_tmp1, &triangle_tmp2);
 					if (collision_flag) {
 #ifdef DEBUG
 						printf("triangle collision!index1 = %d, index2 = %d\n",
 						       vnode1->tindex[i], vnode2->tindex[j]);
+						show_triangle(vnode1->tarry, vnode1->tindex[i]);
+						show_triangle(vnode2->tarry, vnode2->tindex[j]);
 #endif
 						break;
 					}
