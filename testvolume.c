@@ -59,7 +59,8 @@ int main(int argc, char *argv[])
 	volumecount++;
 #endif
 
-	JAngle robotangle(0.0, -10.00, 62.00, 0.00, 0.00, 0.00);
+	JAngle robotangle(atof(argv[3]), atof(argv[4]), atof(argv[5]), atof(argv[6]), atof(argv[7]), atof(argv[8]));
+	/* JAngle robotangle(0.0, -23.00, 52.500, 16.00, 19.00, 0.00); */
 	JAngle exangle(0.00, 0.00, 0.00, 0.00, 0.00, 0.00);
 	
 
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
 	
 	part_trans = Transform::getTransWorldToWorkpiece(exangle);
 	
-	maxdepth = 10;
+	maxdepth = atoi(argv[9]);
 
 	vector3d tmp1, tmp2;
 	tmp1.x = newgun_trans.pos.dx;
