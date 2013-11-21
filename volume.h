@@ -42,6 +42,8 @@ static inline int volumecd(const volume *v1, const volume *v2)
 	return 1;
 }
 
+int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t);
+
 //build the volume
 int buildvolume(volumenode *vnode);
 
@@ -62,8 +64,13 @@ void show_triangle(triangle *t, int index);
 void recurshowtree(const volumenode *vnode, int depth);
 
 //cd initialization
-int cd_init(char *path1, volumenode *left_top_node,
-	    char *path2, volumenode *right_top_node);
+volumenode *cd_init(char *path);
+
+int collision_detection1(volumenode *left_node, matrix m1, vector3d *v1,
+			 volumenode *right_node, matrix m2, vector3d *v2);
+
+int collision_detection2(volumenode *left_node,	volumenode *right_node,
+			 matrix r2l_m, vector3d *r2l_v);
 
 //finish cd, release memory
 int cd_finish(volumenode *vnode);

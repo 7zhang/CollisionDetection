@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 // 0 if no collision
-int triangleCD(triangle *t1, triangle *t2)
+int triangleCD(const triangle *t1, const triangle *t2)
 {
 	/* double tmptest; */
 	/* tmptest = t1->normalvector.x * t1->normalvector.x + t1->normalvector.y * t1->normalvector.y + t1->normalvector.z * t1->normalvector.z; */

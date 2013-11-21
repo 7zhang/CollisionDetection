@@ -61,7 +61,14 @@ static inline void vectorcross(const vector3d *lhs, const vector3d *rhs, vector3
 	cross->z = lhs->x * rhs->y - lhs->y * rhs->x;
 }
 
-static inline double commonpoint(vector3d *p1, vector3d *tangent1, vector3d *p2, vector3d *tangent2)
+static inline double distance(const vector3d *a, const vector3d *b)
+{
+	return sqrt((a->x - b->x) * (a->x - b->x) + (a->y - b->y) * (a->y - b->y)
+		    + (a->z - b->z) * (a->z - b->z)); 
+}
+
+static inline double commonpoint(const vector3d *p1, const vector3d *tangent1,
+				 const vector3d *p2, const vector3d *tangent2)
 {
 	vector3d diff;
 	vectorminus(p2, p1, &diff);
