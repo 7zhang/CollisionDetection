@@ -6,7 +6,26 @@
 #include "loadstl.h"
 #include "geom.h"
 
-#define MAXLENGTH 60
+#ifdef DEBUG
+extern int volumecount;
+extern int cdcount;
+extern int last_count;
+extern int triangle_cd_count;
+#endif
+
+int triangle_allocation(const volumenode *parent, volumenode *left, volumenode *right);
+
+//return 0 if no collision
+static inline int volumecd(const volume *v1, const volume *v2)
+{
+	if (v1->xmax < v2->xmin || v1->xmin > v2->xmax)
+		return 0;
+	if (v1->ymax < v2->ymin || v1->ymin > v2->ymax)
+		return 0;
+	if (v1->zmax < v2->zmin || v1->zmin > v2->zmax)
+		return 0;
+	return 1;
+}
 
 void vertex_copy(const vector3d *from, vector3d *to)
 {
@@ -22,7 +41,7 @@ void middle(const vector3d *from1, const vector3d *from2, vector3d *to)
 	to->z = (from1->z + from2->z) / 2;
 }
 
-int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t)
+int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t, int maxlength)
 {
 	double d1, d2, d3;
 	d1 = distance(&t->vertex1, &t->vertex2);
@@ -32,7 +51,7 @@ int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t)
 	triangle tmp1, tmp2;
 	vector3d mid;
 
-	if (d1 > MAXLENGTH && d1 >= d2 && d1 >= d3) {
+	if (d1 > maxlength && d1 >= d2 && d1 >= d3) {
 		middle(&t->vertex1, &t->vertex2, &mid);
 		
 		vertex_copy(&t->normalvector, &tmp1.normalvector);		
@@ -45,9 +64,9 @@ int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t)
 		vertex_copy(&t->vertex3, &tmp2.vertex2);
 		vertex_copy(&mid, &tmp2.vertex3);
 		
-		triangle_cut_recur(array, n, index, &tmp1);
-		triangle_cut_recur(array, n, index, &tmp2);
-	} else if (d2 > MAXLENGTH && d2 >= d1 && d2 >= d3) {
+		triangle_cut_recur(array, n, index, &tmp1, maxlength);
+		triangle_cut_recur(array, n, index, &tmp2, maxlength);
+	} else if (d2 > maxlength && d2 >= d1 && d2 >= d3) {
 		middle(&t->vertex1, &t->vertex3, &mid);
 		
 		vertex_copy(&t->normalvector, &tmp1.normalvector);		
@@ -60,9 +79,9 @@ int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t)
 		vertex_copy(&t->vertex3, &tmp2.vertex2);
 		vertex_copy(&mid, &tmp2.vertex3);		
 
-		triangle_cut_recur(array, n, index, &tmp1);
-		triangle_cut_recur(array, n, index, &tmp2);
-	} else if (d3 > MAXLENGTH && d3 >= d1 && d3 >= d2) {
+		triangle_cut_recur(array, n, index, &tmp1, maxlength);
+		triangle_cut_recur(array, n, index, &tmp2, maxlength);
+	} else if (d3 > maxlength && d3 >= d1 && d3 >= d2) {
 		middle(&t->vertex2, &t->vertex3, &mid);
 		
 		vertex_copy(&t->normalvector, &tmp1.normalvector);		
@@ -75,8 +94,8 @@ int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t)
 		vertex_copy(&t->vertex3, &tmp2.vertex2);
 		vertex_copy(&mid, &tmp2.vertex3);
 		
-		triangle_cut_recur(array, n, index, &tmp1);
-		triangle_cut_recur(array, n, index, &tmp2);
+		triangle_cut_recur(array, n, index, &tmp1, maxlength);
+		triangle_cut_recur(array, n, index, &tmp2, maxlength);
 	} else {
 		if (*index >= *n) {
 			triangle *tt = (triangle *)malloc(sizeof(triangle) * 2 * (*n));
@@ -96,7 +115,7 @@ int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t)
 		
 }
 
-int triangle_cut(stldata *stl)
+int triangle_cut(stldata *stl, int maxlength)
 {
 	int *n = (int *)malloc(sizeof(int));
 	int *index = (int *)malloc(sizeof(int));
@@ -109,7 +128,7 @@ int triangle_cut(stldata *stl)
 	int i;
 	for (i = 0; i < stl->num; ++i)
 	{
-		triangle_cut_recur(array, n, index, &stl->ptriangle[i]);
+		triangle_cut_recur(array, n, index, &stl->ptriangle[i], maxlength);
 	}
 
 	stl->num = *index;
@@ -122,7 +141,7 @@ int triangle_cut(stldata *stl)
 
 /* use the tarray and tindex to build the volume v
  */
-int buildvolume(volumenode *vnode)
+int build_volume(volumenode *vnode)
 {
 	int i;
 	triangle *ttmp = &vnode->tarry[vnode->tindex[0]];
@@ -194,18 +213,22 @@ int buildvolume(volumenode *vnode)
 	}
 
 #ifdef DEBUG
-	if (vnode->v.xmax - vnode->v.xmin < POSITIVEZERO && vnode->v.ymax - vnode->v.ymin < POSITIVEZERO && vnode->v.zmax - vnode->v.zmin < POSITIVEZERO) {
-		printf("error:x y z length all equal 0");
+	if (vnode->v.xmax - vnode->v.xmin < POSITIVEZERO &&
+	    vnode->v.ymax - vnode->v.ymin < POSITIVEZERO &&
+	    vnode->v.zmax - vnode->v.zmin < POSITIVEZERO) {
+		printf("error:x y z length all equal 0\n");
 	}
 #endif
 
-	/* if (vnode->v.ymax - vnode->v.ymin < POSITIVEZERO) { */
-	/* 	printf("y length equal 0"); */
-	/* } */
+#ifdef WARNING
+	if (vnode->v.ymax - vnode->v.ymin < POSITIVEZERO) {
+		printf("warning:y length equal 0\n");
+	}
 	
-	/* if (vnode->v.zmax - vnode->v.zmin < POSITIVEZERO) { */
-	/* 	printf("z length equal 0"); */
-	/* } */
+	if (vnode->v.zmax - vnode->v.zmin < POSITIVEZERO) {
+		printf("warning:z length equal 0\n");
+	}
+#endif
 	
 	return 0;
 }
@@ -263,14 +286,15 @@ void update_volume(const matrix m, const vector3d *v, const volume *from, volume
 	}
 }
 
-int recurbuildtree(volumenode *vnode, int depth)
+/* return the depth if success, -1 if error */
+int build_tree_recur(volumenode *vnode, int maxtriangle)
 {
 	volumenode *left = (volumenode *)malloc(sizeof(volumenode));
 	volumenode *right = (volumenode *)malloc(sizeof(volumenode));
 	
 #ifdef DEBUG
 	if (left == NULL || right == NULL) {
-		printf("recurbuildtree malloc error!\n");
+		printf("build_tree_recur malloc error!\n");
 		return -1;
 	}
 #endif
@@ -283,11 +307,11 @@ int recurbuildtree(volumenode *vnode, int depth)
 	left->tarraysize = vnode->tarraysize;
 	right->tarraysize = vnode->tarraysize;
 
-	int tmp = triangleallocation(vnode, left, right);
+	int tmp = triangle_allocation(vnode, left, right);
 
 	switch(tmp){
 	case 0:
-		if (buildvolume(left) != 0) {
+		if (build_volume(left) != 0) {
 			printf("buildvolume(left) error!\n");
 			free(left->tindex);
 			free(right->tindex);
@@ -297,7 +321,7 @@ int recurbuildtree(volumenode *vnode, int depth)
 			return -1;
 		}
 			      
-		if (buildvolume(right) != 0) {
+		if (build_volume(right) != 0) {
 			printf("buildvolume(right) error!\n");
 			free(left->tindex);
 			free(right->tindex);
@@ -319,14 +343,14 @@ int recurbuildtree(volumenode *vnode, int depth)
 		right->m = vnode->m;
 		right->vector = vnode->vector;
 		
-//		free(vnode->tindex);
-//		vnode->trianglenum = 0;
+		free(vnode->tindex);
+		/* vnode->trianglenum = 0; */
 #ifdef DEBUG
 		volumecount += 2;
 #endif
-		if (left->trianglenum > MAXTRIANGLE) {
-			if (recurbuildtree(left, depth + 1) == -1) {
-				printf("recurbuildtree(left) error! left->trianglenum = %d\n",
+		if (left->trianglenum > maxtriangle) {
+			if (build_tree_recur(left, maxtriangle + 1) == -1) {
+				printf("build_tree_recur(left) error! left->trianglenum = %d\n",
 				       left->trianglenum);
 				return -1;
 			}
@@ -337,9 +361,9 @@ int recurbuildtree(volumenode *vnode, int depth)
 #endif
 		}
 
-		if (right->trianglenum > MAXTRIANGLE) {
-			if (recurbuildtree(right, depth + 1) == -1) {
-				printf("recurbuildtree(right) error! right->trianglenum = %d\n",
+		if (right->trianglenum > maxtriangle) {
+			if (build_tree_recur(right, maxtriangle + 1) == -1) {
+				printf("build_tree_recur(right) error! right->trianglenum = %d\n",
 				       right->trianglenum);
 				return -1;
 			}
@@ -360,7 +384,6 @@ int recurbuildtree(volumenode *vnode, int depth)
 #endif
 		vnode->child1 = NULL;
 		vnode->child2 = NULL;
-//		printf("depth = %d\n", depth);
 
 		return 0;		
 	case 2:
@@ -372,7 +395,7 @@ int recurbuildtree(volumenode *vnode, int depth)
 	}
 }
 
-int triangleallocation(const volumenode *parent, volumenode *left, volumenode *right)
+int triangle_allocation(const volumenode *parent, volumenode *left, volumenode *right)
 {
 	/* if (parent->trianglenum < 1) { */
 	/* 	printf("parent->trianglenum = %d\n", parent->trianglenum); */
@@ -549,7 +572,11 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 			break;
 		default:
 			success = 0;
-			printf("warning: triangleallocation switch case error\n!");
+
+#ifdef WARNING
+			printf("warning: triangleallocation switch reach default\n!");
+#endif
+
 			break;
 		}
 
@@ -631,11 +658,11 @@ int triangleallocation(const volumenode *parent, volumenode *left, volumenode *r
 void show_triangle(triangle *t, int index) 
 {
 	printf("triangle %d:\n", index);
-	printf("normal vector: x = %f, y = %f, z = %f\n",
+	printf("normal vector: %f, %f, %f\n",
 	       t[index].normalvector.x, t[index].normalvector.y, t[index].normalvector.z);
-	printf("vertex1: x = %f, y = %f, z = %f\n", t[index].vertex1.x, t[index].vertex1.y, t[index].vertex1.z);
-	printf("vertex2: x = %f, y = %f, z = %f\n", t[index].vertex2.x, t[index].vertex2.y, t[index].vertex2.z);
-	printf("vertex3: x = %f, y = %f, z = %f\n", t[index].vertex3.x, t[index].vertex3.y, t[index].vertex3.z);
+	printf("vertex1: %f, %f, %f\n", t[index].vertex1.x, t[index].vertex1.y, t[index].vertex1.z);
+	printf("vertex2: %f, %f, %f\n", t[index].vertex2.x, t[index].vertex2.y, t[index].vertex2.z);
+	printf("vertex3: %f, %f, %f\n", t[index].vertex3.x, t[index].vertex3.y, t[index].vertex3.z);
 }
 
 void show_volume(const volume *v)
@@ -646,12 +673,19 @@ void show_volume(const volume *v)
 }
 
 //show the volume tree
-void recurshowtree(const volumenode *vnode, int depth)
+void show_tree_recur(const volumenode *vnode, int depth)
 {
 	int i;
 	
-	show_volume(&vnode->v);
+	printf("depth = %d\n", depth);
 	
+	if (vnode->last == 1)
+		printf("triangle num: = %d\n", vnode->trianglenum);
+
+#ifdef SHOWVOLUME	
+	show_volume(&vnode->v);
+#endif	
+
 	/* if (vnode->child1 != NULL && vnode->child1->trianglenum != 0) { */
 	/* 	for (i = 0; i < depth; ++i)  */
 	/* 		printf("      "); */
@@ -669,8 +703,8 @@ void recurshowtree(const volumenode *vnode, int depth)
 	/* } */
 	
 	if (vnode->child1 != NULL && vnode->child2 != NULL) {
-		recurshowtree(vnode->child1, depth + 1);
-		recurshowtree(vnode->child2, depth + 1);
+		show_tree_recur(vnode->child1, depth + 1);
+		show_tree_recur(vnode->child2, depth + 1);
 	}
 }
 
@@ -734,13 +768,14 @@ int collision_detection_recur(const volumenode *left_node, const volumenode *rig
 					triangle_cd_count++;
 #endif
 					
-					collision_flag = triangleCD(&left_node->tarry[left_node->tindex[i]], &triangle_tmp2);
+					collision_flag = triangleCD(&(left_node->tarry[left_node->tindex[i]]), &triangle_tmp2);
 					if (collision_flag) {
 #ifdef DEBUG
-						printf("triangle collision!index1 = %d, index2 = %d\n",
+						printf("\ntriangle collision!\nindex1 = %d, index2 = %d\n\n",
 						       left_node->tindex[i], right_node->tindex[j]);
 						show_triangle(left_node->tarry, left_node->tindex[i]);
 						show_triangle(right_node->tarry, right_node->tindex[j]);
+						show_triangle(&triangle_tmp2, 0);
 #endif
 						break;
 					}
@@ -770,7 +805,7 @@ int collision_detection_recur(const volumenode *left_node, const volumenode *rig
 	return 0;
 }
 
-volumenode *cd_init(char *path)	    
+volumenode *cd_init(char *path, parameter *p)
 {
 	stldata model;
 	volumenode *vnode;
@@ -778,8 +813,17 @@ volumenode *cd_init(char *path)
 	if (loadstl(path, &model) != 0) {
 		printf("loadstl %s error!\n", path);
 	}
+
+#ifdef DEBUG	
+	printf("model :%s\n", model.modelname);
+	printf("triangle number before cut: %d\n", model.num);
 	
-	triangle_cut(&model);
+#endif
+	triangle_cut(&model, p->max_length);
+
+#ifdef DEBUG
+	printf("triangle number after cut: %d\n", model.num);
+#endif
 
 	vnode = (volumenode *)malloc(sizeof(volumenode));
 	vnode->tarry = model.ptriangle;
@@ -792,19 +836,57 @@ volumenode *cd_init(char *path)
 		vnode->tindex[i] = i;
 		
 	vnode->trianglenum = model.num;
-	buildvolume(vnode);
+	build_volume(vnode);
 	vnode->parent = NULL;
 	
 	vnode->m = (double *)malloc(sizeof(matrix));
 	vnode->vector = (vector3d *)malloc(sizeof(vector3d));
 
-	if (recurbuildtree(vnode, 0) == -1) 
-		printf("recurbuildtree error!\n");
+	if (build_tree_recur(vnode, p->max_triangle) == -1) 
+		printf("build_tree_recur error!\n");
 	
 	return vnode;
 }
 
-int collision_detection1(volumenode *left_node, matrix m1, vector3d *v1,
+int collision_detection1(volumenode *left_node,	volumenode *right_node,
+			 matrix r2l_m, vector3d *r2l_v)
+{
+	int i, j;
+	
+	if (left_node->trianglenum < right_node->trianglenum) {
+		volumenode *swap;
+		
+		swap = left_node;
+		left_node = right_node;
+		right_node = swap;
+		
+		for (i = 0; i < 3; ++i)
+			for (j = 0; j < 3; ++j)
+				right_node->m[3 * i + j] = r2l_m[i][j];
+		
+		vector3d zero = {0.0, 0.0, 0.0};
+		vector3d buf_v;
+		
+		buf_v.x = -r2l_v->x;
+		buf_v.y = -r2l_v->y;
+		buf_v.z = -r2l_v->z;
+		
+		transpose((double (*)[3])right_node->m);
+		point_transform((double (*)[3])right_node->m, &zero, &buf_v, right_node->vector);
+	} else {
+		for (i = 0; i < 3; ++i)
+			for (j = 0; j < 3; ++j)
+				right_node->m[3 * i + j] = r2l_m[i][j];
+
+		right_node->vector->x = r2l_v->x;
+		right_node->vector->y = r2l_v->y;
+		right_node->vector->z = r2l_v->z;
+	}
+	
+	return collision_detection_recur(left_node, right_node);
+}
+
+int collision_detection2(volumenode *left_node, matrix m1, vector3d *v1,
 			 volumenode *right_node, matrix m2, vector3d *v2)
 {
 	int i, j;
@@ -859,53 +941,11 @@ int collision_detection1(volumenode *left_node, matrix m1, vector3d *v1,
 		
 	point_transform(tmp_m1, &zero, &tmp_v1, &buf_v1);
 	point_transform(tmp_m1, &buf_v1, &tmp_v2, right_node->vector);
-	
+
 	return collision_detection_recur(left_node, right_node);	
 }
 
-int collision_detection2(volumenode *left_node,	volumenode *right_node,
-			 matrix r2l_m, vector3d *r2l_v)
-{
-	int i, j;
-	
-	if (left_node->trianglenum < right_node->trianglenum) {
-		vector3d buf_v;
-		
-		for (i = 0; i < 3; ++i)
-			for (j = 0; j < 3; ++j)
-				right_node->m[3 * i + j] = r2l_m[i][j];
-		
-		volumenode *swap;
-		vector3d zero = {0.0, 0.0, 0.0};
-		
-		swap = left_node;
-		left_node = right_node;
-		right_node = swap;
-
-		buf_v.x = -r2l_v->x;
-		buf_v.y = -r2l_v->y;
-		buf_v.z = -r2l_v->z;
-		
-		transpose((double (*)[3])right_node->m);
-		point_transform((double (*)[3])right_node->m, &zero, &buf_v, right_node->vector);
-
-		for (i = 0; i < 3; ++i)
-			for (j = 0; j < 3; ++j)
-				right_node->m[3 * i + j] = r2l_m[i][j];
-	} else {
-		for (i = 0; i < 3; ++i)
-			for (j = 0; j < 3; ++j)
-				right_node->m[3 * i + j] = r2l_m[i][j];
-
-		right_node->vector->x = r2l_v->x;
-		right_node->vector->y = r2l_v->y;
-		right_node->vector->z = r2l_v->z;
-	}
-	
-	return collision_detection_recur(left_node, right_node);
-}
-
-int cd_finish(volumenode *vnode)
+int cd_finish_recur(volumenode *vnode)
 {
 	if (vnode == NULL)
 		return 0;
@@ -913,14 +953,15 @@ int cd_finish(volumenode *vnode)
 	if (vnode->last == 1)
 		free(vnode->tindex);
 
-	cd_finish(vnode->child1);
-	cd_finish(vnode->child2);
+	cd_finish_recur(vnode->child1);
+	cd_finish_recur(vnode->child2);
 	free(vnode);
 }
 
-
-
-
-
-
-
+int cd_finish(volumenode *vnode)
+{
+	free(vnode->tarry);
+	free(vnode->m);
+	free(vnode->vector);
+	cd_finish_recur(vnode);
+}

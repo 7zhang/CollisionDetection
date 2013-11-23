@@ -79,21 +79,21 @@ int triangleCD(const triangle *t1, const triangle *t2)
 	if ((dot1 < NEGATIVEZERO & dot2 > POSITIVEZERO & dot3 > POSITIVEZERO) ||
 	    (dot1 > POSITIVEZERO & dot2 < NEGATIVEZERO & dot3 < NEGATIVEZERO)) {
 		vectorminus(&t1->vertex1, &t1->vertex2, &tmp);
-		para1 = commonpoint(&p, &tangent, &t1->vertex1, &tmp);
+		para1 = common_point(&p, &tangent, &t1->vertex1, &tmp);
 		vectorminus(&t1->vertex1, &t1->vertex3, &tmp);
-		para2 = commonpoint(&p, &tangent, &t1->vertex1, &tmp);
+		para2 = common_point(&p, &tangent, &t1->vertex1, &tmp);
 	} else if ((dot1 > POSITIVEZERO & dot2 < NEGATIVEZERO & dot3 > POSITIVEZERO) ||
 		   (dot1 < NEGATIVEZERO & dot2 > POSITIVEZERO & dot3 < NEGATIVEZERO)) {
 		vectorminus(&t1->vertex2, &t1->vertex1, &tmp);
-		para1 = commonpoint(&p, &tangent, &t1->vertex2, &tmp);
+		para1 = common_point(&p, &tangent, &t1->vertex2, &tmp);
 		vectorminus(&t1->vertex2, &t1->vertex3, &tmp);
-		para2 = commonpoint(&p, &tangent, &t1->vertex2, &tmp);
+		para2 = common_point(&p, &tangent, &t1->vertex2, &tmp);
 	} else if ((dot1 > POSITIVEZERO & dot2 > POSITIVEZERO & dot3 < NEGATIVEZERO) ||
 		   (dot1 < NEGATIVEZERO & dot2 < NEGATIVEZERO & dot3 > POSITIVEZERO)) {
 		vectorminus(&t1->vertex3, &t1->vertex1, &tmp);
-		para1 = commonpoint(&p, &tangent, &t1->vertex3, &tmp);
+		para1 = common_point(&p, &tangent, &t1->vertex3, &tmp);
 		vectorminus(&t1->vertex3, &t1->vertex2, &tmp);
-		para2 = commonpoint(&p, &tangent, &t1->vertex3, &tmp);
+		para2 = common_point(&p, &tangent, &t1->vertex3, &tmp);
 	} else {
 		return 0;
 	}
@@ -101,22 +101,27 @@ int triangleCD(const triangle *t1, const triangle *t2)
 	if ((dot4 < NEGATIVEZERO & dot5 > POSITIVEZERO & dot6 > POSITIVEZERO) ||
 	    (dot4 > POSITIVEZERO & dot5 < NEGATIVEZERO & dot6 < NEGATIVEZERO)) {
 		vectorminus(&t2->vertex1, &t2->vertex2, &tmp);
-		para3 = commonpoint(&p, &tangent, &t2->vertex1, &tmp);
+		para3 = common_point(&p, &tangent, &t2->vertex1, &tmp);
 		vectorminus(&t2->vertex1, &t2->vertex3, &tmp);
-		para4 = commonpoint(&p, &tangent, &t2->vertex1, &tmp);
+		para4 = common_point(&p, &tangent, &t2->vertex1, &tmp);
 	} else if ((dot4 > POSITIVEZERO & dot5 < NEGATIVEZERO & dot6 > POSITIVEZERO) ||
 		   (dot4 < NEGATIVEZERO & dot5 > POSITIVEZERO & dot6 < NEGATIVEZERO)) {
 		vectorminus(&t2->vertex2, &t2->vertex1, &tmp);
-		para3 = commonpoint(&p, &tangent, &t2->vertex2, &tmp);
+		para3 = common_point(&p, &tangent, &t2->vertex2, &tmp);
 		vectorminus(&t2->vertex2, &t2->vertex3, &tmp);
-		para4 = commonpoint(&p, &tangent, &t2->vertex2, &tmp);
+		para4 = common_point(&p, &tangent, &t2->vertex2, &tmp);
 	} else if ((dot4 > POSITIVEZERO & dot5 > POSITIVEZERO & dot6 < NEGATIVEZERO) ||
 		   (dot4 < NEGATIVEZERO & dot5 < NEGATIVEZERO & dot6 > POSITIVEZERO)) {
 		vectorminus(&t2->vertex3, &t2->vertex1, &tmp);
-		para3 = commonpoint(&p, &tangent, &t2->vertex3, &tmp);
+		para3 = common_point(&p, &tangent, &t2->vertex3, &tmp);
 		vectorminus(&t2->vertex3, &t2->vertex2, &tmp);
-		para4 = commonpoint(&p, &tangent, &t2->vertex3, &tmp);
+		para4 = common_point(&p, &tangent, &t2->vertex3, &tmp);
 	} else {
+		return 0;
+	}
+	
+	if (isnan(para1) || isnan(para2) || isnan(para3) || isnan(para4)) {
+		printf("NAN encoutered\n");
 		return 0;
 	}
 	

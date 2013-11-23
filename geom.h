@@ -1,7 +1,7 @@
 #ifndef _GEOM_H_
 #define _GEOM_H_
 
-
+#include <stdio.h>
 #include <math.h>
 
 #define ISZERO(u) (fabs(u) < 1e-6)
@@ -67,13 +67,45 @@ static inline double distance(const vector3d *a, const vector3d *b)
 		    + (a->z - b->z) * (a->z - b->z)); 
 }
 
-static inline double commonpoint(const vector3d *p1, const vector3d *tangent1,
-				 const vector3d *p2, const vector3d *tangent2)
+static inline double common_point(const vector3d *p1, const vector3d *tangent1,
+				  const vector3d *p2, const vector3d *tangent2)
 {
 	vector3d diff;
 	vectorminus(p2, p1, &diff);
-	return (diff.x * tangent2->y - diff.y * tangent2->x)
-		/ (tangent1->x * tangent2->y - tangent1->y * tangent2->x);
+
+	vector3d lhs, rhs;
+	
+	vectorcross(tangent1, tangent2, &rhs);
+	vectorcross(&diff, tangent2, &lhs);
+	
+	double tmp1, tmp2;
+	
+	vectordot(&rhs, &rhs, &tmp1);
+	vectordot(&lhs, &lhs, &tmp2);
+
+	if (lhs.x != 0) {
+		if ((lhs.x > 0 && rhs.x > 0) || (lhs.x < 0 && rhs.x < 0)) {
+			return  sqrt(tmp2/tmp1);		
+		} else {
+			return -sqrt(tmp2/tmp1);
+		}
+	}
+
+	if (lhs.y != 0) {
+		if ((lhs.y > 0 && rhs.y > 0) || (lhs.y < 0 && rhs.y < 0)) {
+			return  sqrt(tmp2/tmp1);		
+		} else {
+			return -sqrt(tmp2/tmp1);
+		}
+	}
+
+	if (lhs.z != 0) {
+		if ((lhs.z > 0 && rhs.z > 0) || (lhs.z < 0 && rhs.z < 0)) {
+			return  sqrt(tmp2/tmp1);		
+		} else {
+			return -sqrt(tmp2/tmp1);
+		}
+	}
 }
 
 static inline void point_transform(const matrix m, const vector3d *vec, const vector3d *from, vector3d *to)

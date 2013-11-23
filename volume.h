@@ -30,79 +30,33 @@ typedef struct _volumenode {
 /* 	int volumenum; */
 }volumenode;
 
-//return 0 if no collision
-static inline int volumecd(const volume *v1, const volume *v2)
+typedef struct _parameter
 {
-	if (v1->xmax < v2->xmin || v1->xmin > v2->xmax)
-		return 0;
-	if (v1->ymax < v2->ymin || v1->ymin > v2->ymax)
-		return 0;
-	if (v1->zmax < v2->zmin || v1->zmin > v2->zmax)
-		return 0;
-	return 1;
-}
+	int max_triangle;
+	int max_length;
+}parameter;
 
-int triangle_cut_recur(triangle **array, int *n, int *index, triangle *t);
+//cd initialization
+volumenode *cd_init(char *path, parameter *p);
 
-//build the volume
-int buildvolume(volumenode *vnode);
+/* collision detection 1*/
+/* use one transformation matrix to transform righ_node into left_node's coordinate */
+/* not tested, bug may exist */
+int collision_detection1(volumenode *left_node,	volumenode *right_node,
+			 matrix r2l_m, vector3d *r2l_v);
 
-//build the volume tree recursively
-//return the depth if success, -1 if error
-int recurbuildtree(volumenode *vnode, int depth);
+/* collision detection 2*/
+/* use two transformation matrix related to the same world coordinate */
+int collision_detection2(volumenode *left_node, matrix m1, vector3d *v1,
+			 volumenode *right_node, matrix m2, vector3d *v2);
 
-//0 if success, 1 if false, 2 if error
-int triangleallocation(const volumenode *parent, volumenode *left, volumenode *right);
-
-//recursive cd
-int collision_detection_recur(const volumenode *left_node, const volumenode *right_node);
+//finish cd, release memory
+int cd_finish(volumenode *vnode);
 
 //show triangle data
 void show_triangle(triangle *t, int index);
 
 //show the volume tree
-void recurshowtree(const volumenode *vnode, int depth);
-
-//cd initialization
-volumenode *cd_init(char *path);
-
-int collision_detection1(volumenode *left_node, matrix m1, vector3d *v1,
-			 volumenode *right_node, matrix m2, vector3d *v2);
-
-int collision_detection2(volumenode *left_node,	volumenode *right_node,
-			 matrix r2l_m, vector3d *r2l_v);
-
-//finish cd, release memory
-int cd_finish(volumenode *vnode);
-
-extern int maxdepth;
-
-#ifdef DEBUG
-extern int volumecount;
-extern int cdcount;
-extern int last_count;
-extern int triangle_cd_count;
-#endif
-
-#define MAXTRIANGLE 3
+void show_tree_recur(const volumenode *vnode, int depth);
 
 #endif /* _VOLUME_H_ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
