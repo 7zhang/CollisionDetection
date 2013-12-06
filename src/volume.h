@@ -1,40 +1,7 @@
 #ifndef _VOLUME_H_
 #define _VOLUME_H_
 
-#include "geom.h"
-
-typedef struct _volume {
-	double xmin, xmax, ymin, ymax, zmin, zmax;
-}volume;
-
-typedef struct _volumenode {
-//const element during collision detection
-	triangle *tarry;
-	int tarraysize;
-	int *tindex;
-	int trianglenum;
-	int depth;
-	volume v;
-	int last;
-
-	struct _volumenode *parent;
-	struct _volumenode *child1, *child2;
-	/* struct _volumenode *left, *right; */
-
-	double *m;
-	vector3d *vector;
-
-/* //mutable element during collision detection */
-/* 	int cdflag; */
-/* 	struct _volumenode *cdvolumelist; */
-/* 	int volumenum; */
-}volumenode;
-
-typedef struct _parameter
-{
-	int max_triangle;
-	int max_length;
-}parameter;
+#include "cd.h"
 
 //cd initialization
 volumenode *cd_init(char *path, parameter *p);

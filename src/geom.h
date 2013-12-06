@@ -3,37 +3,7 @@
 
 #include <stdio.h>
 #include <math.h>
-
-#define ISZERO(u) (fabs(u) < 1e-6)
-#define MAX(a, b) (a > b ? a : b)
-#define MIN(a, b) (a < b ? a : b)
-#define POSITIVEZERO 1e-12
-#define NEGATIVEZERO -1e-12
-#define MYZERO 1e-6
-typedef struct _vector3d
-{
-	double x;
-	double y;
-	double z;
-}vector3d;
-
-typedef double matrix[3][3];
-
-typedef struct _triangle
-{
-	vector3d normalvector;
-	vector3d vertex1;
-	vector3d vertex2;
-	vector3d vertex3;
-	unsigned short attr;
-}triangle;
-
-typedef struct _stldata
-{
-	char modelname[80];
-	int num;
-	triangle *ptriangle;
-}stldata;
+#include "cd.h"
 			
 static inline void vectoradd(const vector3d *v1, const vector3d *v2, vector3d *sum)
 {

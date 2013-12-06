@@ -1,6 +1,7 @@
-#include "triangleCD.h"
-#include "geom.h"
 #include <stdio.h>
+#include "triangle_cd.h"
+#include "geom.h"
+#include "cd_macro.h"
 
 // 0 if no collision
 int triangleCD(const triangle *t1, const triangle *t2)

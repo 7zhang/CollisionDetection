@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "volume.h"
-#include "triangleCD.h"
+#include "triangle_cd.h"
 #include "loadstl.h"
 #include "geom.h"
 
@@ -20,10 +20,13 @@ static inline int volumecd(const volume *v1, const volume *v2)
 {
 	if (v1->xmax < v2->xmin || v1->xmin > v2->xmax)
 		return 0;
+	
 	if (v1->ymax < v2->ymin || v1->ymin > v2->ymax)
 		return 0;
+	
 	if (v1->zmax < v2->zmin || v1->zmin > v2->zmax)
 		return 0;
+	
 	return 1;
 }
 
@@ -130,9 +133,11 @@ int triangle_cut(stldata *stl, int maxlength)
 	{
 		triangle_cut_recur(array, n, index, &stl->ptriangle[i], maxlength);
 	}
-
+	
 	stl->num = *index;
-	stl->ptriangle = *array;
+	stl->ptriangle = (triangle *)malloc(sizeof(triangle) * (*index));
+	memcpy(stl->ptriangle, *array, sizeof(triangle) * (*index));
+	free(*array);
 	
 	free(n);
 	free(index);
@@ -805,7 +810,7 @@ int collision_detection_recur(const volumenode *left_node, const volumenode *rig
 	return 0;
 }
 
-volumenode *cd_init(char *path, parameter *p)
+volumenode *cd_init(char *path, cd_parameter *p)
 {
 	stldata model;
 	volumenode *vnode;

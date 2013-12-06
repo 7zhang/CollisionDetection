@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "loadstl.h"
-#include "triangleCD.h"
+#include "triangle_cd.h"
 #include "volume.h"
-//#include "Transform.h"
 
 int volumecount = 0;
 int maxdepth = 0;
