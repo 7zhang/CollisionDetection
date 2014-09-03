@@ -3,7 +3,37 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "cd.h"
+
+#define ISZERO(u) (fabs(u) < 1e-6)
+#define MAX(a, b) (a > b ? a : b)
+#define MIN(a, b) (a < b ? a : b)
+#define POSITIVEZERO 1e-12
+#define NEGATIVEZERO -1e-12
+#define MYZERO 1e-6
+typedef struct _vector3d
+{
+	double x;
+	double y;
+	double z;
+}vector3d;
+
+typedef double matrix[3][3];
+
+typedef struct _triangle
+{
+	vector3d normalvector;
+	vector3d vertex1;
+	vector3d vertex2;
+	vector3d vertex3;
+	unsigned short attr;
+}triangle;
+
+typedef struct _stldata
+{
+	char modelname[80];
+	int num;
+	triangle *ptriangle;
+}stldata;
 			
 static inline void vectoradd(const vector3d *v1, const vector3d *v2, vector3d *sum)
 {
@@ -22,6 +52,13 @@ static inline void vectorminus(const vector3d *lhs, const vector3d *rhs, vector3
 static inline void vectordot(const vector3d *v1, const vector3d *v2, double *dot)
 {
 	*dot = v1->x * v2->x + v1->y * v2->y + v1->z * v2->z;
+}
+
+static inline void length(const vector3d *v, double *length)
+{
+	double tmp;
+	vectordot(v, v, &tmp);
+	*length = sqrt(tmp);
 }
 
 static inline void vectorcross(const vector3d *lhs, const vector3d *rhs, vector3d *cross)
@@ -53,7 +90,7 @@ static inline double common_point(const vector3d *p1, const vector3d *tangent1,
 	vectordot(&rhs, &rhs, &tmp1);
 	vectordot(&lhs, &lhs, &tmp2);
 
-	if (lhs.x != 0) {
+	if (fabs(rhs.x) > POSITIVEZERO) {
 		if ((lhs.x > 0 && rhs.x > 0) || (lhs.x < 0 && rhs.x < 0)) {
 			return  sqrt(tmp2/tmp1);		
 		} else {
@@ -61,7 +98,7 @@ static inline double common_point(const vector3d *p1, const vector3d *tangent1,
 		}
 	}
 
-	if (lhs.y != 0) {
+	if (fabs(rhs.y) > POSITIVEZERO) {
 		if ((lhs.y > 0 && rhs.y > 0) || (lhs.y < 0 && rhs.y < 0)) {
 			return  sqrt(tmp2/tmp1);		
 		} else {
@@ -69,13 +106,66 @@ static inline double common_point(const vector3d *p1, const vector3d *tangent1,
 		}
 	}
 
-	if (lhs.z != 0) {
+	if (fabs(rhs.z) > POSITIVEZERO) {
 		if ((lhs.z > 0 && rhs.z > 0) || (lhs.z < 0 && rhs.z < 0)) {
 			return  sqrt(tmp2/tmp1);		
 		} else {
 			return -sqrt(tmp2/tmp1);
 		}
 	}
+}
+
+//lhs = t * rhs
+static inline void add_sign(const vector3d *lhs, const vector3d *rhs, double *t)
+{
+	double tmp;
+	tmp = *t;
+	if (fabs(rhs->x) > POSITIVEZERO) {
+		if ((lhs->x > 0 && rhs->x > 0) || (lhs->x < 0 && rhs->x < 0)) {
+			return ;		
+		} else {
+			*t = -tmp;
+			return ;
+		}
+	}
+	
+	if (fabs(rhs->y) > POSITIVEZERO) {
+		if ((lhs->y > 0 && rhs->y > 0) || (lhs->y < 0 && rhs->y < 0)) {
+			return ;		
+		} else {
+			*t = -tmp;
+			return ;
+		}
+	}
+	
+	if (fabs(rhs->z) > POSITIVEZERO) {
+		if ((lhs->z > 0 && rhs->z > 0) || (lhs->z < 0 && rhs->z < 0)) {
+			return ;		
+		} else {
+			*t = -tmp;
+			return ;
+		}
+	}
+}
+
+static inline void intersect_line_surface(const vector3d *line_point, const vector3d *line_tangent										  , const vector3d *surface_point, const vector3d *surface_normal										  , vector3d *cross)
+{
+	vector3d diff;
+	vectorminus(surface_point, line_point, &diff);
+	double tmp1, tmp2;
+	vectordot(line_tangent, surface_normal, &tmp1);
+	vectordot(&diff, surface_normal, &tmp2);
+
+#ifdef DEBUG
+	if(fabs(tmp1) < POSITIVEZERO) {
+		printf("Error, possibly divided by zero\n");
+	}
+#endif
+
+	double t = tmp2 / tmp1;
+	cross->x = line_point->x + t * line_tangent->x;
+	cross->y = line_point->y + t * line_tangent->y;
+	cross->z = line_point->z + t * line_tangent->z;
 }
 
 static inline void point_transform(const matrix m, const vector3d *vec, const vector3d *from, vector3d *to)
@@ -128,21 +218,5 @@ static inline void matrix_multiply(const matrix left, const matrix right, matrix
 	ret[2][2] = left[2][0] * right[0][2] + left[2][1] * right[1][2] + left[2][2] * right[2][2];
 }
 
+
 #endif /* _GEOM_H_ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

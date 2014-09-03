@@ -3,6 +3,6 @@
 
 
 #include "geom.h"
-int triangleCD(const triangle *t1, const triangle *t2);
+int triangle_cd(const triangle *t1, const triangle *t2);
 
 #endif /* _TRIANGLECD_H_ */

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "volume.h"
+#include "cd.h"
 #include "triangle_cd.h"
 #include "loadstl.h"
 #include "geom.h"
@@ -773,7 +773,7 @@ int collision_detection_recur(const volumenode *left_node, const volumenode *rig
 					triangle_cd_count++;
 #endif
 					
-					collision_flag = triangleCD(&(left_node->tarry[left_node->tindex[i]]), &triangle_tmp2);
+					collision_flag = triangle_cd(&(left_node->tarry[left_node->tindex[i]]), &triangle_tmp2);
 					if (collision_flag) {
 #ifdef DEBUG
 						printf("\ntriangle collision!\nindex1 = %d, index2 = %d\n\n",

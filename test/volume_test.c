@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "volume.h"
+#include "cd.h"
 #include "loadstl.h"
-#include "triangleCD.h"
+#include "triangle_cd.h"
 #include "Transform.h"
 
 int maxdepth = 0;

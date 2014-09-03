@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "triangleCD.h"
+#include "triangle_cd.h"
 #include <math.h>
 
 int main(int argc, char *argv[])
@@ -22,55 +22,55 @@ int main(int argc, char *argv[])
 	triangle test12 = {{0.000000, 0.294753, 0.955573}, {44.000000, 620.374878, 704.944336}, {44.000000, 626.253662, 703.070557}, {26.500000, 621.844574, 704.475891}};
 	triangle test13 = {{-0.427209, -0.892652, -0.143751}, {47.880010, 623.875197, 700.599021}, {56.192231, 619.084170, 705.340469}, {47.306150, 623.563901, 704.353816}};
 
-	if (triangleCD(&test1, &test2) != 0 || triangleCD(&test2, &test1) != 0) {
+	if (triangle_cd(&test1, &test2) != 0 || triangle_cd(&test2, &test1) != 0) {
 		printf("test1 not passed\n");
 	} else {
 		printf("test1 passed\n");
 	}
 
-	if (triangleCD(&test1, &test3) != 0 || triangleCD(&test3, &test1) != 0) {
+	if (triangle_cd(&test1, &test3) != 0 || triangle_cd(&test3, &test1) != 0) {
 		printf("test2 not passed\n");
 	} else {
 		printf("test2 passed\n");
 	}
 	
-	if (triangleCD(&test4, &test5) != 1 || triangleCD(&test5, &test4) != 1) {
+	if (triangle_cd(&test4, &test5) != 1 || triangle_cd(&test5, &test4) != 1) {
 		printf("test3 not passed\n");
 	} else {
 		printf("test3 passed\n");
 	}
 		
-	if (triangleCD(&test4, &test6) != 0 || triangleCD(&test6, &test4) != 0) {
+	if (triangle_cd(&test4, &test6) != 0 || triangle_cd(&test6, &test4) != 0) {
 		printf("test4 not passed\n");
 	} else {
 		printf("test4 passed\n");
 	}
 
-	if (triangleCD(&test1, &test7) != 0 || triangleCD(&test7, &test1) != 0) {
+	if (triangle_cd(&test1, &test7) != 0 || triangle_cd(&test7, &test1) != 0) {
 		printf("test5 not passed\n");
 	} else {
 		printf("test5 passed\n");
 	}
 
-	if (triangleCD(&test8, &test9) != 1) {
+	if (triangle_cd(&test8, &test9) != 1) {
 		printf("test6 not passed\n");
 	} else {
 		printf("test6 passed\n");
 	}
 	
-	if (triangleCD(&test9, &test8) != 1) {
+	if (triangle_cd(&test9, &test8) != 1) {
 		printf("test7 not passed\n");
 	} else {
 		printf("test7 passed\n");
 	}
 
-	if (triangleCD(&test10, &test11) != 0 || triangleCD(&test11, &test10) != 0) {
+	if (triangle_cd(&test10, &test11) != 0 || triangle_cd(&test11, &test10) != 0) {
 		printf("test8 not passed\n");
 	} else {
 		printf("test8 passed\n");
 	}
 
-	if (triangleCD(&test12, &test13) != 0 || triangleCD(&test13, &test12) != 0) {
+	if (triangle_cd(&test12, &test13) != 0 || triangle_cd(&test13, &test12) != 0) {
 		printf("test9 not passed\n");
 	} else {
 		printf("test9 passed\n");
